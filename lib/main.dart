@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/loan_page.dart';
 import 'package:untitled1/widgets/search_bar.dart';
 
 import 'First_page.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/first': (context) => const FirstPage(),
+        '/second': (context) => const LoanPage()
       },
     );
   }
@@ -64,6 +66,9 @@ class _MyHomePageState extends State<MyHomePage> {
    Navigator.pushNamed(context, '/first');
   }
 
+  void go_to_loan_page(){
+    Navigator.pushNamed(context, '/second');
+  }
   void null_Function(){
     print('null function');
   }
@@ -119,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 child: GestureDetector(
-                  onTap: go_to_first_page,
+                  onTap: go_to_loan_page,
                   child: Text(
                     'add equipment to loaner',
                     style: Theme.of(context).textTheme.headlineMedium,
