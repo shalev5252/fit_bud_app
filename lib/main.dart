@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/widgets/search_bar.dart';
+
+import 'First_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'החתמת ציוד',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -28,25 +31,20 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lime),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: ''),
+      initialRoute: '/',
+      routes: {
+        '/first': (context) => const FirstPage(),
+      },
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -55,17 +53,19 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  TextEditingController _searchController = TextEditingController();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void _handleSearch(String query) {
+    // Implement your search logic here
+    print("Searching for: $query");
+  }
+
+  void go_to_first_page(){
+   Navigator.pushNamed(context, '/first');
+  }
+
+  void null_Function(){
+    print('null function');
   }
 
   @override
@@ -87,39 +87,105 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
+        child:
+        SingleChildScrollView(
+          child:
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            buildSearchBar(controller: _searchController, onSearch: _handleSearch),
+            SizedBox(height: 10),
+            //add equipment to storage button
+            Container(
+              padding: EdgeInsets.all(30),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              child: GestureDetector(
+                onTap: go_to_first_page,
+                child: Text(
+                  'ADD equipment to storage',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              )
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            SizedBox(height: 10),
+            //add equipment to loaner button
+            Container(
+                padding: EdgeInsets.all(30),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: GestureDetector(
+                  onTap: go_to_first_page,
+                  child: Text(
+                    'add equipment to loaner',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                )
             ),
+            SizedBox(height: 10),
+            //show equipment loaned
+            Container(
+                padding: EdgeInsets.all(30),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: GestureDetector(
+                  onTap: go_to_first_page,
+                  child: Text(
+                    'show all loaners',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                )
+            ),
+            SizedBox(height: 10),
+            //show equipment state
+            Container(
+                padding: EdgeInsets.all(30),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: GestureDetector(
+                  onTap: go_to_first_page,
+                  child: Text(
+                    'show equipment states',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                )
+            ),
+            SizedBox(height: 10),
+            //show equipment state
+            Container(
+                padding: EdgeInsets.all(30),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: GestureDetector(
+                  onTap: go_to_first_page,
+                  child: Text(
+                    'show equipment states',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                )
+            ),
+
+
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),)
     );
   }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
 }
