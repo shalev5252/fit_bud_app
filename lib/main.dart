@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/loan_page.dart';
+import 'package:untitled1/users_equipments.dart';
 import 'package:untitled1/widgets/search_bar.dart';
 
 import 'First_page.dart';
+import 'equipment_summary_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,7 +41,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/first': (context) => const FirstPage(),
-        '/second': (context) => const LoanPage()
+        '/second': (context) => const LoanPage(),
+        '/third': (context) => const EquipSumPage(),
+        '/fourth': (context) => const UserEquipmentPage()
       },
     );
   }
@@ -68,6 +72,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void go_to_loan_page(){
     Navigator.pushNamed(context, '/second');
+  }
+
+  void go_to_equip_sum_page(){
+    Navigator.pushNamed(context, '/third');
+  }
+
+  void go_to_show_page(){
+    Navigator.pushNamed(context, '/fourth');
   }
   void null_Function(){
     print('null function');
@@ -140,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 child: GestureDetector(
-                  onTap: go_to_first_page,
+                  onTap: go_to_show_page,
                   child: Text(
                     'show all loaners',
                     style: Theme.of(context).textTheme.headlineMedium,
@@ -156,31 +168,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 child: GestureDetector(
-                  onTap: go_to_first_page,
+                  onTap: go_to_equip_sum_page,
                   child: Text(
                     'show equipment states',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 )
             ),
-            SizedBox(height: 10),
-            //show equipment state
-            Container(
-                padding: EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                child: GestureDetector(
-                  onTap: go_to_first_page,
-                  child: Text(
-                    'show equipment states',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                )
-            ),
-
-
           ],
         ),
       ),)
