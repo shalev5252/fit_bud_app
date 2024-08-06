@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class DateOfBirthPicker extends StatefulWidget {
   final void Function(DateTime selectedDate)? onDateSelected;
 
-  const DateOfBirthPicker({Key? key, this.onDateSelected}) : super(key: key);
+  const DateOfBirthPicker({super.key, this.onDateSelected});
 
   @override
   _DateOfBirthPickerState createState() => _DateOfBirthPickerState();
@@ -45,7 +45,7 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
                     ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
                     : '',
               ),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Date of Enlistment',
                 hintText: 'Select Date',
               ),
@@ -53,7 +53,7 @@ class _DateOfBirthPickerState extends State<DateOfBirthPicker> {
           ),
         ),
         IconButton(
-          icon: Icon(Icons.calendar_today),
+          icon: const Icon(Icons.calendar_today),
           onPressed: () {
             _selectDate(context);
           },

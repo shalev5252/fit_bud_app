@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:horizontal_data_table/horizontal_data_table.dart';
 
 import 'classes/Equipment_counter.dart';
+import 'design_features.dart';
 
 class EquipSumPage extends StatefulWidget {
   const EquipSumPage({super.key});
@@ -11,116 +12,135 @@ class EquipSumPage extends StatefulWidget {
 }
 
 class _EquipSumPageState extends State<EquipSumPage> {
-  List<Equipment_summary> items = [
-    Equipment_summary('Item 1', 100, 50),
-    Equipment_summary('Item 2',30 , 12),
-    Equipment_summary('Item 3', 90 , 67),
-    Equipment_summary('Item 1', 100, 50),
-    Equipment_summary('Item 2',30 , 12),
-    Equipment_summary('Item 3', 90 , 67),
-    Equipment_summary('Item 1', 100, 50),
-    Equipment_summary('Item 2',30 , 12),
-    Equipment_summary('Item 3', 90 , 67),
+  List<Equipment_summary> items = [];
+  int? sortColumnIndex;
+  bool isAscending = false;
+  bool _loading = true;
+  String? _errorMessage;
 
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchEquipmentSummaries();
+  }
 
-  List<DataColumn> list_column = [
-    DataColumn(label: Text('name')),
-    DataColumn(label: Text('storage quantity')),
-    DataColumn(label: Text('loaned quantity')),
-    DataColumn(label: Text('quantity left in storage')),
-
-  ];
-
+  void _fetchEquipmentSummaries() async {
+    final firestore = FirebaseFirestore.instance;
+    try {
+      final querySnapshot = await firestore.collection('equipment').get();
+      final summaries = querySnapshot.docs.map((doc) {
+        return Equipment_summary.fromDocument(doc.data(), doc.id);
+      }).toList();
+      setState(() {
+        items = summaries;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error fetching equipment summaries: $e';
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('מעקב ציוד'),
+      appBar:  AppBar(
+        title: Hero(
+            tag: "equipment state",
+            child: Center(
+                child: Text('מציבת ציוד', style: labelTextStyle))),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
-      body:
-      HorizontalDataTable(
-        leftHandSideColumnWidth: MediaQuery.sizeOf(context).width * 0.2,
-        rightHandSideColumnWidth: (MediaQuery.sizeOf(context).width - 100),
-        isFixedHeader: true,
-        headerWidgets: _getTitleWidget(),
-        leftSideItemBuilder: _generateFirstColumnRow,
-        rightSideItemBuilder: _generateRightHandSideColumnRow,
-        itemCount: items.length,
-        rowSeparatorWidget: const Divider(
-          color: Colors.black38,
-          height: 1.0,
-          thickness: 0.0,
-        ),
-        leftHandSideColBackgroundColor: const Color(0xFFFFFFFF),
-        rightHandSideColBackgroundColor: const Color(0xFFFFFFFF),
-        itemExtent: 55,
-      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+          ? Center(child: Text(_errorMessage!))
+
+          : SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+              child: DataTable(
+                sortColumnIndex: sortColumnIndex,
+                sortAscending: isAscending,
+
+                headingRowColor: MaterialStateColor.resolveWith(
+                      (states) {
+                    return appBarColor;
+                  },
+                ),
+                border: TableBorder.all(width: 2.0, color: Colors.white),
+                columns: [
+                  DataColumn(label: Text("במחסן",style: userMenuTextStyle),onSort: sortTable),
+                  DataColumn(label: Text("בחוץ",style: userMenuTextStyle),onSort: sortTable),
+                  DataColumn(label: Text("סך הכל",style: userMenuTextStyle),onSort: sortTable),
+                  DataColumn(label: Text("ציוד",style: userMenuTextStyle), onSort: sortTable),
+                ],
+                rows: items.asMap().entries.map((entry) {
+                  Equipment_summary item = entry.value;
+                  return DataRow(
+                    onLongPress: () => _showAlertDialog(context, item),
+                    cells: [
+                      DataCell(Text(item.current_quantity.toString(),style: tableTextStyle)),
+                      DataCell(Text((item.quantity_total - item.current_quantity).toString(),style: tableTextStyle)),
+                      DataCell(Text(item.quantity_total.toString(),style: tableTextStyle)),
+                      DataCell(Text(item.name,style: tableTextStyle)),
+                    ],
+                  );
+                }).toList(),
+                dividerThickness: 3,
+              ),
+            ),
+        ],),
+        )
     );
   }
 
-  List<Widget> _getTitleWidget() {
-    double width1 = (MediaQuery.sizeOf(context).width - 100)/3;
-    return [
-      _getTitleItemWidget('Name', 100),
-      _getTitleItemWidget('quantity is storage', width1),
-      _getTitleItemWidget('quantity in use', width1),
-      _getTitleItemWidget('quantity left', width1),
-
-    ];
-  }
-
-  Widget _getTitleItemWidget(String label, double width) {
-    return Container(
-      width: width,
-      height: 56,
-      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-      alignment: Alignment.center,
-      child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+  void _showAlertDialog(BuildContext context, Equipment_summary item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Row Tapped'),
+          content: Text('You double-tapped on: ${item.name}'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _generateFirstColumnRow(BuildContext context, int index) {
-    return Container(
-      width: 100,
-      height: 52,
-      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-      alignment: Alignment.center,
-      child: Text(items[index].name),
-    );
+  void sortTable(int columnIndex, bool ascending) {
+    setState(() {
+      sortColumnIndex = columnIndex;
+      isAscending = ascending;
+      if (columnIndex == 0) {
+        items.sort((a, b) => (a.quantity_total - a.current_quantity).compareTo(b.quantity_total - b.current_quantity));
+      } else if (columnIndex == 1) {
+        items.sort((a, b) => a.current_quantity.compareTo(b.current_quantity));
+      } else if (columnIndex == 2) {
+        items.sort((a, b) => a.quantity_total.compareTo(b.quantity_total));
+      } else if (columnIndex == 3) {
+        items.sort((a, b) => a.name.compareTo(b.name));
+      }
+      if (!ascending) {
+        items = items.reversed.toList();
+      }
+    });
   }
-
-  Widget _generateRightHandSideColumnRow(BuildContext context, int index) {
-    double width1 = (MediaQuery.sizeOf(context).width - 100)/3;
-
-    return Row(
-      children: <Widget>[
-        Container(
-          width: width1,
-          height: 52,
-          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-          alignment: Alignment.center,
-          child: Text(items[index].quantity_in_storage.toString()),
-        ),
-
-        Container(
-          width: width1,
-          height: 52,
-          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-          alignment: Alignment.center,
-          child: Text(items[index].quantity_in_use.toString()),
-        ),
-
-        Container(
-          width: width1,
-          height: 52,
-          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-          alignment: Alignment.center,
-          child: Text((items[index].quantity_in_storage - items[index].quantity_in_use).toString()),
-        ),
-      ],
-    );
-  }
-
 }

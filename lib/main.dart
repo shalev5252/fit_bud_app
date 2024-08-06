@@ -1,41 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/loan_page.dart';
+import 'package:untitled1/past_commits_page.dart';
 import 'package:untitled1/users_equipments.dart';
 import 'package:untitled1/widgets/search_bar.dart';
-
 import 'First_page.dart';
+import 'design_features.dart';
 import 'equipment_summary_page.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    if (kIsWeb) {
+      await Firebase.initializeApp(
+        options: FirebaseOptions(
+            apiKey: "AIzaSyDbCmHUgspgVqTT6b15mc6LvcBPiR15qJc",
+            authDomain: "storagekepp.firebaseapp.com",
+            projectId: "storagekepp",
+            storageBucket: "storagekepp.appspot.com",
+            messagingSenderId: "546266079998",
+            appId: "1:546266079998:web:220106647f055f6860fbaf",
+            measurementId: "G-3N446WG4G0"
+        ),
+      );
+    } else {
+      await Firebase.initializeApp();
+    }
+    runApp(const MyApp());
+  } catch (e, stackTrace) {
+    print('Error initializing Firebase: $e');
+    print(stackTrace);
+  }
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'החתמת ציוד',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lime),
-        useMaterial3: true,
+        // colorScheme: ColorScheme.fromSeed(seedColor: Color.fromRGBO(0, 0, 0, 1)),
+        // useMaterial3: true,
+        appBarTheme: AppBarTheme( backgroundColor: appBarColor),
+        brightness: Brightness.dark,
       ),
       home: const MyHomePage(title: ''),
       initialRoute: '/',
@@ -43,7 +53,8 @@ class MyApp extends StatelessWidget {
         '/first': (context) => const FirstPage(),
         '/second': (context) => const LoanPage(),
         '/third': (context) => const EquipSumPage(),
-        '/fourth': (context) => const UserEquipmentPage()
+        '/fourth': (context) => const UserEquipmentPage(),
+        '/fifth': (context) => const PastCommitPage(),
       },
     );
   }
@@ -59,126 +70,82 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   void _handleSearch(String query) {
     // Implement your search logic here
     print("Searching for: $query");
   }
 
-  void go_to_first_page(){
-   Navigator.pushNamed(context, '/first');
+  void goToFirstPage() {
+    Navigator.pushNamed(context, '/first');
   }
 
-  void go_to_loan_page(){
+  void goToLoanPage() {
     Navigator.pushNamed(context, '/second');
   }
 
-  void go_to_equip_sum_page(){
+  void goToEquipSumPage() {
     Navigator.pushNamed(context, '/third');
   }
 
-  void go_to_show_page(){
+  void goToShowPage() {
     Navigator.pushNamed(context, '/fourth');
   }
-  void null_Function(){
-    print('null function');
+
+  void goToPastCommits() {
+    Navigator.pushNamed(context, '/fifth');
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      // appBar: AppBar(
+      //   // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      //   title: Text(widget.title, style: labelTextStyle,),
+      // ),
       body: Center(
-        child:
-        SingleChildScrollView(
-          child:
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            buildSearchBar(controller: _searchController, onSearch: _handleSearch),
-            SizedBox(height: 10),
-            //add equipment to storage button
-            Container(
-              padding: EdgeInsets.all(30),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              child: GestureDetector(
-                onTap: go_to_first_page,
-                child: Text(
-                  'ADD equipment to storage',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              )
-            ),
-            SizedBox(height: 10),
-            //add equipment to loaner button
-            Container(
-                padding: EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                child: GestureDetector(
-                  onTap: go_to_loan_page,
-                  child: Text(
-                    'add equipment to loaner',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                )
-            ),
-            SizedBox(height: 10),
-            //show equipment loaned
-            Container(
-                padding: EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                child: GestureDetector(
-                  onTap: go_to_show_page,
-                  child: Text(
-                    'show all loaners',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                )
-            ),
-            SizedBox(height: 10),
-            //show equipment state
-            Container(
-                padding: EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                child: GestureDetector(
-                  onTap: go_to_equip_sum_page,
-                  child: Text(
-                    'show equipment states',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                )
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              // buildSearchBar(controller: _searchController, onSearch: _handleSearch),
+              const SizedBox(height: 70),
+              Hero(tag: "add storage eq",
+                  child: _buildNavigationButton(context, 'הוספת ציוד לאחסון', goToFirstPage)),
+              const SizedBox(height: 53),
+              Hero(tag: "loan equipment",
+                  child: _buildNavigationButton(context, 'החתמת/זיכוי ציוד', goToLoanPage)),
+              const SizedBox(height: 53),
+              _buildNavigationButton(context, 'Show all loaners', goToShowPage),
+              const SizedBox(height: 53),
+              Hero(tag: 'equipment state', child:
+              _buildNavigationButton(context, 'מציבת ציוד', goToEquipSumPage)),
+              const SizedBox(height: 53),
+              _buildNavigationButton(context, 'Show past commits', goToPastCommits),
+              const SizedBox(height: 10),
+            ],
+          ),
         ),
-      ),)
+      ),
     );
+  }
+
+  Widget _buildNavigationButton(BuildContext context, String text, VoidCallback onTap) {
+    return Container(
+      padding: const EdgeInsets.all(30),
+      decoration: BoxDecoration(
+        // borderRadius: BorderRadius.circular(10),
+        color: directorsBotoomBarColor,
+      ),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Center(child: Text(
+          text,
+          style: labelTextStyle,
+        ),
+      ),
+    ));
   }
 
   @override

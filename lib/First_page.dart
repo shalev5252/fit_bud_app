@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:toggle_switch/toggle_switch.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:untitled1/design_features.dart';
+import 'package:untitled1/widgets/animated_toggle_switch.dart';
 
 class FirstPage extends StatefulWidget {
-  const FirstPage({super.key});
+  const FirstPage({Key? key}) : super(key: key);
 
   @override
   State<FirstPage> createState() => _FirstPageState();
@@ -10,90 +12,211 @@ class FirstPage extends StatefulWidget {
 
 class _FirstPageState extends State<FirstPage> {
   bool _isSwitchedOn = false;
-  bool add_new_equipment = false;
+  bool addNewEquipment = false;
   String? _selectedValue;
+  final TextEditingController _equipmentController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  String? errorMessage;
+  List<String> _equipmentNames = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEquipmentNames();
+  }
+
+  void _handleToggleSwitchChanged(bool newValue) {
+    setState(() {
+      _isSwitchedOn = newValue;
+    });
+  }
+
+  void _fetchEquipmentNames() async {
+    final firestore = FirebaseFirestore.instance;
+    try {
+      final querySnapshot = await firestore.collection('equipment').get();
+      final names = querySnapshot.docs.map((doc) => doc.id).toList();
+      setState(() {
+        _equipmentNames = names;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error fetching equipment names: $e';
+      });
+    }
+  }
 
   void _handleToggle(int index) {
     setState(() {
-      _isSwitchedOn = index == 1; // Assuming index 1 is "On" and index 0 is "Off"
+      _isSwitchedOn = index == 1;
     });
+  }
+
+  Future<void> _handleSubmit() async {
+    final firestore = FirebaseFirestore.instance;
+    try {
+      final equipmentName =
+          addNewEquipment ? _equipmentController.text : _selectedValue;
+      final quantityStr = _quantityController.text;
+      if (equipmentName == null || equipmentName.isEmpty) {
+        setState(() {
+          errorMessage = 'שם הציוד לא יכול להיות ריק';
+        });
+        return;
+      }
+      final quantity = int.tryParse(quantityStr);
+      if (quantity == null || quantity < 0) {
+        setState(() {
+          errorMessage = 'כמות לא תקינה';
+        });
+        return;
+      }
+
+      Map<String, dynamic> data = {
+        "quantity": FieldValue.increment(_isSwitchedOn ? -quantity : quantity),
+        "current_quantity":
+            FieldValue.increment(_isSwitchedOn ? -quantity : quantity)
+      };
+      await firestore
+          .collection("equipment")
+          .doc(equipmentName)
+          .set(data, SetOptions(merge: true));
+      _quantityController.clear();
+      // Refresh the equipment names list after adding new equipment
+      if (addNewEquipment) {
+        _fetchEquipmentNames();
+        _equipmentController.clear();
+        setState(() {
+          addNewEquipment = false;
+          _selectedValue = null;
+        });
+      }
+
+      setState(() {
+        errorMessage = null;
+      });
+      print('Operation successful');
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+      });
+      print('Error: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _equipmentController.dispose();
+    _quantityController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add equipment to storage'),
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            SizedBox(height: 30),
-            DropdownButton<String>(
-              hint: Text('Select an option'),
-              value: _selectedValue,
-              items: <String>['A', 'B', 'C', 'Other'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedValue = value;
-                  if (value == 'Other') {
-                    // Implement your logic here
-                    add_new_equipment = true;
-                  }
-                  else{
-                    add_new_equipment = false;
-                  }
-                });
-              },
-            ),
-            SizedBox(height: 30),
+        appBar: AppBar(
+          title: Hero(
+              tag: "add storage eq",
+              child: Center(
+                  child: Text('הוספת ציוד לאחסון', style: labelTextStyle))),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          iconTheme: IconThemeData(color: Colors.black),
+        ),
+        body: SingleChildScrollView(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    Center(
+                        child: ToggleSwitch(
+                            onChanged: _handleToggleSwitchChanged)),
+                    // Text(_isSwitchedOn ? "הסרת ציוד" : "הוספת ציוד"),
+                    const SizedBox(height: 30),
+                    Container(
+                        decoration: BoxDecoration(
+                            color: appBarColor,
+                            borderRadius: BorderRadius.circular(10)),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        child: DropdownMenu(
+                          menuHeight: 300,
+                          width: MediaQuery.sizeOf(context).width * 0.7,
+                          label: Text("בחר אפשרות", style: labelTextStyle),
+                          textStyle: labelTextStyle,
+                          dropdownMenuEntries:
+                              _equipmentNames.map((String value) {
+                                    return DropdownMenuEntry(
+                                        style: MenuItemButton.styleFrom(
+                                            backgroundColor: appBarColor,
+                                            textStyle: labelTextStyle,
+                                            foregroundColor: Colors.black),
+                                        value: value,
+                                        label: value);
+                                  }).toList() +
+                                  [
+                                    DropdownMenuEntry(
+                                        style: MenuItemButton.styleFrom(
+                                            backgroundColor: appBarColor,
+                                            textStyle: labelTextStyle,
+                                            foregroundColor: Colors.black),
+                                        value: 'Other',
+                                        label: 'אחר')
+                                  ],
+                          onSelected: (value) {
+                            setState(() {
+                              _selectedValue = value;
+                              addNewEquipment = value == 'Other';
+                            });
+                          },
+                        )),
+                    addNewEquipment ? SizedBox(height: 10) : SizedBox(),
+                    if (addNewEquipment)
+                      TextField(
+                        style: inputTextStyle,
+                        controller: _equipmentController,
+                        decoration: InputDecoration(
+                          fillColor: Colors.white,
+                          hintText: 'הכנס שם ציוד',
+                        ),
+                      )
+                    else if (_selectedValue != null)
+                      Text('ציוד נבחר: $_selectedValue'),
 
-            ToggleSwitch(
-              minWidth: 90.0,
-              initialLabelIndex: _isSwitchedOn ? 1 : 0,
-              cornerRadius: 20.0,
-              activeFgColor: Colors.white,
-              inactiveBgColor: Colors.grey,
-              inactiveFgColor: Colors.white,
-              totalSwitches: 2,
-              labels: ['Add', 'Remove'],
-              activeBgColors: [[Colors.blue],[Colors.pink]],
-              onToggle: (index) {
-                _handleToggle(index!);
-              },
-            ),
-            Text('${_isSwitchedOn} - ${_isSwitchedOn ? "subtruct equipment" : "add equipment"}'),
-
-            add_new_equipment ?
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Enter equipment name',
+                    const SizedBox(height: 10),
+                    TextField(
+                      style: inputTextStyle,
+                      controller: _quantityController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'הכנס כמות',
+                      ),
+                    ),
+                    if (errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      style: ButtonStyle(backgroundColor: MaterialStateProperty.all(appBarColor)),
+                      onPressed: _handleSubmit,
+                      child: Text('אישור',style: labelTextStyle),
+                    ),
+                  ],
+                ),
               ),
-            ) : Container( child: Text('$_selectedValue'),),
-
-            SizedBox(height: 10),
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Enter quantity',
-              ),
             ),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
-                // Implement your add/remove logic here
-                print('confirm button pressed');
-              },
-              child: const Text('Add/Remove'),
-            ),
-          ],
-        )
-
-      ),
-    );
+          ),
+        ));
   }
 }

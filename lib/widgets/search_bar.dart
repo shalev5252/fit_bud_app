@@ -5,7 +5,7 @@ Widget buildSearchBar({required TextEditingController controller, required Funct
     padding: const EdgeInsets.all(8.0),
     child: TextField(
       controller: controller,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         hintText: 'Search...',
         prefixIcon: Icon(Icons.search),
         border: OutlineInputBorder(

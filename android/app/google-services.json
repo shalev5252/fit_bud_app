@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "546266079998",
+    "project_id": "storagekepp",
+    "storage_bucket": "storagekepp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:546266079998:android:323784f72295eb1660fbaf",
+        "android_client_info": {
+          "package_name": "com.example.untitled1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDggJG-TK22hP4XDFwDzsX-uPPL400nnDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
